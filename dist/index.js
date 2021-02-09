@@ -9,8 +9,6 @@ exports["default"] = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
-var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
 var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
@@ -19,19 +17,21 @@ var _nodeFetch = _interopRequireDefault(require("node-fetch"));
 
 var _url = require("url");
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
 var validateArgs = function validateArgs(urls) {
+  var stringErr = new Error('Please provide a single url string or array of url strings');
   var urlArr;
 
   if (typeof urls === 'string') {
     urlArr = [urls];
-  } else if (!Array.isArray(urls)) {
-    throw new Error('Please provide a single url or array of urls');
-  } else {
+  } else if (Array.isArray(urls)) {
+    urls.forEach(function (url) {
+      if (typeof url !== 'string') {
+        throw stringErr;
+      }
+    });
     urlArr = (0, _toConsumableArray2["default"])(urls);
+  } else {
+    throw stringErr;
   }
 
   urlArr.forEach(function (url) {
@@ -46,7 +46,7 @@ var validateArgs = function validateArgs(urls) {
 
 var requestJSONs = /*#__PURE__*/function () {
   var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(urls) {
-    var validUrls, results;
+    var validUrls, response;
     return _regenerator["default"].wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -58,30 +58,43 @@ var requestJSONs = /*#__PURE__*/function () {
             }));
 
           case 3:
-            results = _context2.sent;
+            response = _context2.sent;
             _context2.next = 6;
-            return Promise.all(results.map( /*#__PURE__*/function () {
+            return Promise.all(response.map( /*#__PURE__*/function () {
               var _ref3 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(_ref2, index) {
-                var reason, status, value, res;
+                var reason, status, value, result, _yield$value$json, data;
+
                 return _regenerator["default"].wrap(function _callee$(_context) {
                   while (1) {
                     switch (_context.prev = _context.next) {
                       case 0:
                         reason = _ref2.reason, status = _ref2.status, value = _ref2.value;
-                        _context.next = 3;
+                        result = {
+                          url: validUrls[index]
+                        };
+
+                        if (!(status === 'fulfilled')) {
+                          _context.next = 10;
+                          break;
+                        }
+
+                        _context.next = 5;
                         return value.json();
 
-                      case 3:
-                        res = _context.sent;
-                        return _context.abrupt("return", _objectSpread(_objectSpread({
-                          url: validUrls[index]
-                        }, status === 'rejected' ? {
-                          reason: reason.message
-                        } : {}), status === 'fulfilled' ? {
-                          value: res.data
-                        } : {}));
-
                       case 5:
+                        _yield$value$json = _context.sent;
+                        data = _yield$value$json.data;
+                        result.data = data;
+                        _context.next = 11;
+                        break;
+
+                      case 10:
+                        result.reason = reason.message;
+
+                      case 11:
+                        return _context.abrupt("return", result);
+
+                      case 12:
                       case "end":
                         return _context.stop();
                     }
