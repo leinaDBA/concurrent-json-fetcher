@@ -40,6 +40,8 @@ describe('bin script', () => {
   it('prints the results', async () => {
     await runBinWithArgs('foo');
 
-    expect(consoleLogSpy).to.have.been.calledOnceWithExactly(returnedData);
+    expect(consoleLogSpy).to.have.been.calledOnceWithExactly(
+      `\u001b[32m'${returnedData}'\u001b[39m`
+    );
   });
 });
