@@ -2,14 +2,22 @@ import fetch from 'node-fetch';
 import { URL } from 'url';
 
 const validateArgs = (urls) => {
+  const stringErr = new Error(
+    'Please provide a single url string or array of url strings'
+  );
   let urlArr;
 
   if (typeof urls === 'string') {
     urlArr = [urls];
   } else if (Array.isArray(urls)) {
+    urls.forEach((url) => {
+      if (typeof url !== 'string') {
+        throw stringErr;
+      }
+    });
     urlArr = [...urls];
   } else {
-    throw new Error('Please provide a single url or array of urls');
+    throw stringErr;
   }
 
   urlArr.forEach((url) => {
